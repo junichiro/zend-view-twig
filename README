@@ -1,0 +1,87 @@
+This module make you use Twig for View of ZendFramework.
+You have to install Twig before you use this class.
+
+INSTALL
+
+You put this class on include path directory.
+
+ex)
+/usr/share/pear/Zend/View/Twig.php
+
+SYNOPSYS
+
+[directories example.]
+
+public_html
+cache
+application
+  Initializer.php
+  default
+    controlles
+      IndexController.php
+    views
+      layouts
+        main.html
+      scripts
+        index
+          index.html
+
+[application/Initializer.php]
+
+public function preDispatch(Zend_Controller_Request_Abstract $request)
+{
+    $this->initView($request->getModuleName());
+}
+
+public function initView($module)
+{
+    $base_path = '../application/'. $module .'/views';
+    $view = new Zend_View_Twig($base_path, array('custom_path' => 'scripts', 'cache_path' => '../cache' ));
+    $viewRenderer =
+        Zend_Controller_Action_HelperBroker::getStaticHelper('ViewRenderer');
+     $viewRenderer->setView($view)
+        ->setViewBasePathSpec($view->template_dir)
+        ->setViewScriptPathSpec(':controller/:action.:suffix')
+        ->setViewScriptPathNoControllerSpec(':action.:suffix')
+        ->setViewSuffix('html')
+        ;
+}
+
+[application/default/IndexController.php]
+
+public function indexAction() {
+    $data = array(
+        'version' => array(
+            'php' => phpversion(),
+            'zend' => Zend_Version::VERSION,
+        )
+    );
+    $this->view->assign($data);
+    $this->view->assign('test', 'Hello world.');
+    // $this->getHelper('viewRenderer')->setNoController()->setScriptAction('index/index');
+}
+
+[application/default/views/scripts/index.html]
+
+{% extends "layouts/main.html" %}
+{% block body %}
+PHP Version:{{ version.php }}
+ZendFramework Version:{{ version.zend }}
+
+{{test}}
+{% endblock %}
+
+[application/default/views/layouts/main.html]
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="/css/common.css" rel="stylesheet" type="text/css" /></head>
+<body>
+<div id="header">
+<h1>Zend_View_Twig</h1>
+</div>
+{% block body %}{% endblock %}
+</body>
+</html>
